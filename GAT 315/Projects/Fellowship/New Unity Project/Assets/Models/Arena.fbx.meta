@@ -32,6 +32,11 @@ ModelImporter:
     4300004: OuterEdge
     4300006: OuterAngles
     4300008: CenterAngles
+    6400000: CenterAngles
+    6400002: CenterStage
+    6400004: OuterAngles
+    6400006: OuterEdge
+    6400008: Walls1
   materials:
     importMaterials: 1
     materialName: 0
@@ -58,7 +63,7 @@ ModelImporter:
     lODScreenPercentages: []
     globalScale: 1
     meshCompression: 0
-    addColliders: 0
+    addColliders: 1
     importBlendShapes: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
