@@ -3,22 +3,43 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
+    public GameObject pauseLogic;
+
     public bool player1 = true;
 
     public float moveSpeed = 10f;
 
-    public float attackSpeed = 1f;
-    public float attackRange = 2;
+    public int attackSpeed = 30;
+    private int attackTimer;
+    public float attackRange = 2f;
 
     public float health = 4f;
 
+    private GameObject h1;
+    private GameObject h2;
+    private GameObject h3;
+    private GameObject h4;
+
+    public GameObject p1h1;
+    public GameObject p1h2;
+    public GameObject p1h3;
+    public GameObject p1h4;
+
+    public GameObject p2h1;
+    public GameObject p2h2;
+    public GameObject p2h3;
+    public GameObject p2h4;
+
     public int dodgeCool = 90;
     private int dodgeTimer;
+
+    public GameObject loseText;
 
     x360_Gamepad gamepad; // Gamepad instance
 
     private Vector3 lastMove = new Vector3 (0.0f, 0.0f, -1.0f);
 
+    // Player Attack Shape
     public Transform attackGhost;
 
     void Awake()
@@ -27,11 +48,19 @@ public class PlayerController : MonoBehaviour
         {
             // Obtain the desired gamepad from GamepadManager
             gamepad = GamepadManager.Instance.GetGamepad(1);
+            h1 = p1h1;
+            h2 = p1h2;
+            h3 = p1h3;
+            h4 = p1h4;
         }
         else
         {
             // Obtain the desired gamepad from GamepadManager
             gamepad = GamepadManager.Instance.GetGamepad(2);
+            h1 = p2h1;
+            h2 = p2h2;
+            h3 = p2h3;
+            h4 = p2h4;
         }
 
         dodgeTimer = dodgeCool;
@@ -110,29 +139,95 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
+            // Player Attacks
             if (gamepad.GetButtonDown("X"))
             {
-                Instantiate(attackGhost, (gameObject.GetComponent<Transform>().position + (lastMove * attackRange)), Quaternion.identity);
-                Debug.Log("Attack");
+                if(attackTimer >= attackSpeed)
+                {
+                    Instantiate(attackGhost, (gameObject.GetComponent<Transform>().position + (lastMove * attackRange)), Quaternion.identity);
+                    attackTimer = 0;
+                }
             }
 
-            if (health <= 0)
+            /*************Cheats*************/
+            /********************************/
+            /*if (Input.GetKeyDown("8"))
             {
+                next Round
+            }*/
+            if (Input.GetKeyDown("9"))
+            {
+                health = 9999;
+            }
+            if (Input.GetKeyDown("0"))
+            {
+                health = 0;
+            }
+            /*********************************/
+            /*********************************/
+
+            if (health >= 4)
+            {
+                h1.GetComponent<SpriteRenderer>().enabled = true;
+                h2.GetComponent<SpriteRenderer>().enabled = true;
+                h3.GetComponent<SpriteRenderer>().enabled = true;
+                h4.GetComponent<SpriteRenderer>().enabled = true;
+            }
+            else if (health == 3)
+            {
+                h1.GetComponent<SpriteRenderer>().enabled = false;
+                h2.GetComponent<SpriteRenderer>().enabled = true;
+                h3.GetComponent<SpriteRenderer>().enabled = true;
+                h4.GetComponent<SpriteRenderer>().enabled = true;
+            }
+            else if (health == 2)
+            {
+                h1.GetComponent<SpriteRenderer>().enabled = false;
+                h2.GetComponent<SpriteRenderer>().enabled = false;
+                h3.GetComponent<SpriteRenderer>().enabled = true;
+                h4.GetComponent<SpriteRenderer>().enabled = true;
+            }
+            else if (health == 1)
+            {
+                h1.GetComponent<SpriteRenderer>().enabled = false;
+                h2.GetComponent<SpriteRenderer>().enabled = false;
+                h3.GetComponent<SpriteRenderer>().enabled = false;
+                h4.GetComponent<SpriteRenderer>().enabled = true;
+            }
+            // Needs to be replaced by a downed mechanic
+            else
+            {
+                // Destroys the player character if they lose all health
                 Destroy(gameObject);
+                h1.GetComponent<SpriteRenderer>().enabled = false;
+                h2.GetComponent<SpriteRenderer>().enabled = false;
+                h3.GetComponent<SpriteRenderer>().enabled = false;
+                h4.GetComponent<SpriteRenderer>().enabled = false;
+                loseText.GetComponent<Transform>().position = new Vector3 (0f, -2.45983f, 12.14942f);
             }
 
+            // Update Timers
             dodgeTimer++;
+            attackTimer++;
         }
 	}
 
-    void OnCollision(GameObject other)
+    void OnCollisionEnter(Collision collision)
     {
-        if (other.gameObject.tag == "Killzone")
+        // Kills the player if they fall out of the arena
+        if (collision.gameObject.tag == "Killzone")
         {
             health = 0;
         }
 
-        if(other.gameObject.tag == "Enemy")
+        // Damages the player if they collide with an enemy
+        if(collision.gameObject.tag == "Enemy")
+        {
+            health -= 1;
+        }
+
+        // Damages the player if they collide with an enemy's attack
+        if (collision.gameObject.tag == "EnemyAttack")
         {
             health -= 1;
         }
